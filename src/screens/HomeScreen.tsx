@@ -1,17 +1,22 @@
 import React from 'react';
 import {Animated, View, Text, StyleSheet, Image, ScrollView, ActivityIndicator} from 'react-native';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
+import { graphql, Query } from 'react-apollo';
+import { compose } from "recompose";
 
 import colors from "../shared/utils/colors";
 import helpers from "../shared/utils/helpers";
 import images from "../shared/utils/images";
 
+import {LIST_ISSUES} from "../shared/queries";
 
 interface Props {
     navigation: any,
+    listIssues: any,
 }
 interface State {
     isLoading: boolean,
+    issues: Array<any>
 }
 
 class HomeScreen extends React.Component<Props, State> {
@@ -19,18 +24,36 @@ class HomeScreen extends React.Component<Props, State> {
     constructor(props){
         super(props);
         this.state = {
+            issues: [],
             isLoading: false,
         };
     }
+    componentDidMount(): void {
+    }
+
     render(){
         return(
             <View style={styles.container}>
-                <Text>HomeScreen</Text>
+                <Query query={LIST_ISSUES}>
+                    {({ loading, error, data }) => {
+                        if (loading) return <Text>Fetching</Text>
+                        if (error) return <Text>Error</Text>
+
+                        const issuesToRender = data.repository.issues
+                        console.log(issuesToRender)
+                        return (
+                            <Text>DONE</Text>
+                        )
+                    }}
+                </Query>
             </View>
         );
     }
 };
-export default HomeScreen;
+export default HomeScreen
+
+// export default compose(
+//     graphql(listIssues, { name: "listIssues" }))(HomeScreen)
 
 const styles = StyleSheet.create({
     container: {
