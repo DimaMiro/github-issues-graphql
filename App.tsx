@@ -1,19 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { View, Platform, StatusBar } from 'react-native';
+import AppNavigator from './src/shared/AppNavigator';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-    </View>
+      <View style={{ flex: 1 }}>
+        {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
+        <AppNavigator/>
+      </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
