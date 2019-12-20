@@ -1,59 +1,51 @@
 import React from 'react';
 import {Animated, View, Text, StyleSheet, Image, ScrollView, ActivityIndicator} from 'react-native';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
-import { graphql, Query } from 'react-apollo';
-import { compose } from "recompose";
+import { Query } from 'react-apollo';
 
 import colors from "../shared/utils/colors";
 import helpers from "../shared/utils/helpers";
 import images from "../shared/utils/images";
 
 import {LIST_ISSUES} from "../shared/queries";
+import {GIssue} from "../shared/interfaces/issue.interface";
+
+import IssueRow from "../components/IssueRow";
 
 interface Props {
     navigation: any,
-    listIssues: any,
-}
-interface State {
-    isLoading: boolean,
-    issues: Array<any>
 }
 
-class HomeScreen extends React.Component<Props, State> {
-
-    constructor(props){
-        super(props);
-        this.state = {
-            issues: [],
-            isLoading: false,
-        };
-    }
-    componentDidMount(): void {
-    }
+class HomeScreen extends React.Component<Props> {
 
     render(){
         return(
             <View style={styles.container}>
+                <View style={[styles.headerContainer]}>
+                    <View style={styles.topContainer}>
+                        <View>
+                            <Image source={images.logo} style={{width: 175, resizeMode: 'contain'}}/>
+                        </View>
+                    </View>
+                </View>
                 <Query query={LIST_ISSUES}>
                     {({ loading, error, data }) => {
-                        if (loading) return <Text>Fetching</Text>
-                        if (error) return <Text>Error</Text>
-
-                        const issuesToRender = data.repository.issues
-                        console.log(issuesToRender)
+                        if (loading) return <ActivityIndicator/>;
+                        if (error) return <Text>Error</Text>;
+                        const issuesToRender: Array<GIssue> = data.repository.issues.nodes;
                         return (
-                            <Text>DONE</Text>
+                            <ScrollView contentContainerStyle={styles.issuesContainer}>
+                                {issuesToRender.map(issue => <IssueRow issue={issue} key={issue.id}/>)}
+                            </ScrollView>
                         )
                     }}
                 </Query>
             </View>
         );
     }
-};
-export default HomeScreen
+}
 
-// export default compose(
-//     graphql(listIssues, { name: "listIssues" }))(HomeScreen)
+export default HomeScreen
 
 const styles = StyleSheet.create({
     container: {
@@ -61,10 +53,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
     },
     headerContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
         backgroundColor: colors.darkBgColor,
         width: '100%',
         paddingTop: getStatusBarHeight() + helpers.padding.s,
@@ -125,7 +113,7 @@ const styles = StyleSheet.create({
         color: 'white',
         marginTop: helpers.margin.xs
     },
-    repoContainer: {
+    issuesContainer: {
         paddingTop: helpers.padding.m,
         paddingHorizontal: helpers.padding.l,
         paddingBottom: helpers.padding.xl,
