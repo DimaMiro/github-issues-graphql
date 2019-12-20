@@ -40,7 +40,7 @@ class HomeScreen extends React.Component<Props, State> {
                     {({ loading, error, data, fetchMore }) => {
                         if (loading) return <ActivityIndicator/>;
                         if (error) return <Text>Error</Text>;
-                        const issuesToRender: Array<GIssue> = data.repository.issues.nodes;
+                        const issuesToRender: Array<GIssue> = (data.repository.issues.nodes).reverse();
                         return (
                             <FlatList
                                 style={styles.issuesContainer}
@@ -56,7 +56,7 @@ class HomeScreen extends React.Component<Props, State> {
                                             this.setState((prevState) => ({
                                                 page: prevState.page + 1
                                             }));
-                                            const newNodes = fetchMoreResult.repository.issues.nodes;
+                                            const newNodes = (fetchMoreResult.repository.issues.nodes);
                                             const pageInfo = fetchMoreResult.repository.issues.pageInfo;
                                             return newNodes.length
                                                 ? {
@@ -64,7 +64,7 @@ class HomeScreen extends React.Component<Props, State> {
                                                         __typename: previousResult.repository.__typename,
                                                         issues: {
                                                             __typename: previousResult.repository.issues.__typename,
-                                                            nodes: [...previousResult.repository.issues.nodes, ...newNodes],
+                                                            nodes: [...newNodes, ...previousResult.repository.issues.nodes],
                                                             pageInfo
                                                         }
                                                     }
