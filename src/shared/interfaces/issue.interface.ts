@@ -5,5 +5,6 @@ export interface GIssue {
     },
     date: string,
     title: string,
-    updatedAt: string
+    updatedAt: string,
+    closed: boolean
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Animated, View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, FlatList} from 'react-native';
+import {View, Text, StyleSheet, Image, ActivityIndicator, FlatList} from 'react-native';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { Query } from 'react-apollo';
 
@@ -15,16 +15,26 @@ import IssueRow from "../components/IssueRow";
 interface Props {
     navigation: any,
 }
+interface State {
+    page: number,
+}
 
-class HomeScreen extends React.Component<Props> {
+class HomeScreen extends React.Component<Props, State> {
+    constructor(props){
+        super(props);
+        this.state =  {
+            page: 1
+        }
+    }
     renderRow = ({item}) => {
-        return (<IssueRow issue={item}/>)
+        return (<IssueRow issue={item} key={item.key}/>)
     };
     render(){
         return(
             <View style={styles.container}>
                 <View style={[styles.headerContainer]}>
                     <Image source={images.logo} style={{width: 175, resizeMode: 'contain'}}/>
+                    <Text style={{color: 'white', fontSize: helpers.fonSize.p}}>Page: {this.state.page}</Text>
                 </View>
                 <Query query={LIST_ISSUES}>
                     {({ loading, error, data, fetchMore }) => {
@@ -38,19 +48,23 @@ class HomeScreen extends React.Component<Props> {
                                 renderItem={this.renderRow}
                                 keyExtractor={(item, index) => index.toString()}
                                 onEndReachedThreshold={1}
+                                removeClippedSubviews={true}
                                 onEndReached={() => {
                                     fetchMore({
-                                        variables: { cursor: data.repository.issues.pageInfo.endCursor },
+                                        variables: { cursor: data.repository.issues.pageInfo.startCursor },
                                         updateQuery: (previousResult, { fetchMoreResult }) => {
-                                            const newEdges = fetchMoreResult.repository.issues.nodes;
+                                            this.setState((prevState) => ({
+                                                page: prevState.page + 1
+                                            }));
+                                            const newNodes = fetchMoreResult.repository.issues.nodes;
                                             const pageInfo = fetchMoreResult.repository.issues.pageInfo;
-                                            return newEdges.length
+                                            return newNodes.length
                                                 ? {
                                                     repository: {
                                                         __typename: previousResult.repository.__typename,
                                                         issues: {
                                                             __typename: previousResult.repository.issues.__typename,
-                                                            nodes: [...previousResult.repository.issues.nodes, ...newEdges],
+                                                            nodes: [...previousResult.repository.issues.nodes, ...newNodes],
                                                             pageInfo
                                                         }
                                                     }
@@ -76,6 +90,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
     },
     headerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         backgroundColor: colors.darkBgColor,
         width: '100%',
         paddingTop: getStatusBarHeight() + helpers.padding.s,
