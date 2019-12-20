@@ -11,24 +11,40 @@ import {LIST_ISSUES} from "../shared/queries";
 import {GIssue} from "../shared/interfaces/issue.interface";
 
 import IssueRow from "../components/IssueRow";
+import {GUserData} from "../shared/interfaces/userData.interface";
 
 interface Props {
     navigation: any,
 }
 interface State {
     page: number,
+    userData: GUserData
 }
 
 class HomeScreen extends React.Component<Props, State> {
     constructor(props){
         super(props);
         this.state =  {
-            page: 1
+            page: 1,
+            userData: {
+                username: '',
+                repo: ''
+            }
         }
     }
+    componentDidMount(): void {
+        this.setState({
+            userData: {
+                username: this.props.navigation.getParam('values').username,
+                repo: this.props.navigation.getParam('values').repo
+            }
+        });
+    }
+
     renderRow = ({item}) => {
         return (<IssueRow issue={item} key={item.key}/>)
-    };
+    }
+
     render(){
         return(
             <View style={styles.container}>
