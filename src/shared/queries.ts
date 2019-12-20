@@ -1,9 +1,9 @@
 import gql from 'graphql-tag';
 
 export const LIST_ISSUES =  gql`
-query {
+query($cursor: String) {
   repository(owner:"facebook", name:"react-native") {
-    issues(last: 5){
+    issues(first: 10, after: $cursor){
       nodes{
           id,
           title,
@@ -11,6 +11,10 @@ query {
           updatedAt,
           closed
       }
+      pageInfo {
+          startCursor
+          endCursor
+       }
     }
   }
-}`
+}`;

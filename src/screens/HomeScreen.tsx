@@ -1,5 +1,5 @@
 import React from 'react';
-import {Animated, View, Text, StyleSheet, Image, ScrollView, ActivityIndicator} from 'react-native';
+import {Animated, View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, FlatList} from 'react-native';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { Query } from 'react-apollo';
 
@@ -17,26 +17,49 @@ interface Props {
 }
 
 class HomeScreen extends React.Component<Props> {
-
+    renderRow = ({item}) => {
+        return (<IssueRow issue={item}/>)
+    };
     render(){
         return(
             <View style={styles.container}>
                 <View style={[styles.headerContainer]}>
-                    <View style={styles.topContainer}>
-                        <View>
-                            <Image source={images.logo} style={{width: 175, resizeMode: 'contain'}}/>
-                        </View>
-                    </View>
+                    <Image source={images.logo} style={{width: 175, resizeMode: 'contain'}}/>
                 </View>
                 <Query query={LIST_ISSUES}>
-                    {({ loading, error, data }) => {
+                    {({ loading, error, data, fetchMore }) => {
                         if (loading) return <ActivityIndicator/>;
                         if (error) return <Text>Error</Text>;
                         const issuesToRender: Array<GIssue> = data.repository.issues.nodes;
                         return (
-                            <ScrollView contentContainerStyle={styles.issuesContainer}>
-                                {issuesToRender.map(issue => <IssueRow issue={issue} key={issue.id}/>)}
-                            </ScrollView>
+                            <FlatList
+                                style={styles.issuesContainer}
+                                data={issuesToRender}
+                                renderItem={this.renderRow}
+                                keyExtractor={(item, index) => index.toString()}
+                                onEndReachedThreshold={1}
+                                onEndReached={() => {
+                                    fetchMore({
+                                        variables: { cursor: data.repository.issues.pageInfo.endCursor },
+                                        updateQuery: (previousResult, { fetchMoreResult }) => {
+                                            const newEdges = fetchMoreResult.repository.issues.nodes;
+                                            const pageInfo = fetchMoreResult.repository.issues.pageInfo;
+                                            return newEdges.length
+                                                ? {
+                                                    repository: {
+                                                        __typename: previousResult.repository.__typename,
+                                                        issues: {
+                                                            __typename: previousResult.repository.issues.__typename,
+                                                            nodes: [...previousResult.repository.issues.nodes, ...newEdges],
+                                                            pageInfo
+                                                        }
+                                                    }
+                                                }
+                                                : previousResult;
+                                        }
+                                    })
+                                }}
+                            />
                         )
                     }}
                 </Query>
@@ -59,59 +82,6 @@ const styles = StyleSheet.create({
         paddingBottom: helpers.padding.xl,
         paddingHorizontal: helpers.padding.l,
         overflow: 'hidden'
-    },
-    topContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    userInfoBox: {
-        flexDirection: 'row',
-        marginTop: helpers.margin.m,
-        alignItems: 'center',
-    },
-    avatarImage: {
-        backgroundColor: colors.lightGrey,
-        width: 64,
-        height: 64,
-        resizeMode: 'cover',
-        borderRadius: helpers.radius.normal
-    },
-    collapsedAvatarImage: {
-        width: 36,
-        height: 36,
-        borderRadius: helpers.radius.small,
-    },
-    collapsedTopContainerInfoBox: {
-        position: 'absolute',
-        flexDirection: 'row',
-        alignItems: 'center',
-        top: helpers.margin.xs,
-    },
-    collapsedNameBlock: {
-        alignItems: 'baseline',
-        flexDirection: 'row',
-        marginLeft: helpers.margin.s,
-    },
-    collapsedUserFullName: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: helpers.fonSize.subtitle,
-    },
-    collapsedUserName: {
-        color: '#A7A9AB',
-        fontSize: helpers.fonSize.caption,
-        marginLeft: helpers.margin.xs,
-    },
-    userFullName: {
-        fontSize: helpers.fonSize.title,
-        color: 'white',
-        fontWeight: 'bold'
-    },
-    userName: {
-        fontSize: helpers.fonSize.subtitle,
-        color: 'white',
-        marginTop: helpers.margin.xs
     },
     issuesContainer: {
         paddingTop: helpers.padding.m,
