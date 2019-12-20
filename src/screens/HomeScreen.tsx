@@ -52,7 +52,7 @@ class HomeScreen extends React.Component<Props, State> {
                     <Image source={images.logo} style={{width: 175, resizeMode: 'contain'}}/>
                     <Text style={{color: 'white', fontSize: helpers.fonSize.p}}>Page: {this.state.page}</Text>
                 </View>
-                <Query query={LIST_ISSUES}>
+                <Query query={LIST_ISSUES} variables={this.state.userData.username !== '' ? {username: this.state.userData.username, repo: this.state.userData.repo} : {}}>
                     {({ loading, error, data, fetchMore }) => {
                         if (loading) return <ActivityIndicator/>;
                         if (error) return <Text>Error</Text>;
