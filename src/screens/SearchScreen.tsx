@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet, Image, Alert, Keyboard} from 'react-native';
+import {View, StyleSheet, Image, Alert, Keyboard, Text} from 'react-native';
 
 import { Formik } from 'formik';
 
@@ -47,6 +47,7 @@ class SearchScreen extends React.Component<Props, State> {
                                     additionalStyle={styles.textInput}
                                     value={repo}
                                     onChangeText={handleChange('repo')}/>
+                                <Text style={styles.hintText}>If you leave fields empty facebook/react-native repo will be fetched</Text>
                                 <PrimaryButton
                                     title={'Fetch data'}
                                     additionalStyle={styles.button}
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: helpers.padding.l,
-        paddingBottom: 150,
+        paddingBottom: 170,
     },
     formContainer: {
         marginTop: helpers.margin.xl,
@@ -79,5 +80,11 @@ const styles = StyleSheet.create({
     },
     button: {
         marginTop: helpers.margin.m,
+    },
+    hintText: {
+        textAlign: 'center',
+        marginTop: helpers.margin.s,
+        color: 'rgba(255,255,255, 0.5)',
+        fontSize: helpers.fonSize.caption
     }
 });
